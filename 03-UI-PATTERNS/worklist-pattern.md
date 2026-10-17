@@ -241,6 +241,22 @@ Long localized titles, right-to-left layout, and text enlargement can change row
 
 ## Operational pitfalls
 
+### Align queue membership with process ownership
+
+“My work” needs an explicit ownership rule. It might mean directly assigned objects, objects available to a team, or objects the user may claim. Those are different collections. If a team queue permits claiming, model Claim as an authoritative backend operation that checks whether the item is still available. Changing the owner locally and then submitting a normal update is insufficient when two people can claim the same item concurrently.
+
+An opened item should not disappear merely because another user has started viewing it unless the process actually defines a reservation. If reservations exist, explain their expiry and release behavior. Navigation itself is not a reliable reservation signal: users can open multiple tabs, follow a deep link, or abandon a session without a clean logout.
+
+### Treat due dates as business data
+
+Sorting by urgency often depends on more than a raw timestamp. Agree whether the due value is a calendar date in a business location or an instant shared across timezones. A date-only service property should not become yesterday merely because the browser applies a local timezone conversion.
+
+For “overdue” filters, compute the boundary consistently with the backend and dashboard definitions. Display the relevant date and reason so that users can understand the ranking. Avoid recalculating deadlines solely in a formatter: formatters can run repeatedly and should not mutate queue membership or issue requests.
+
+### Avoid per-row service waterfalls
+
+A row that separately loads its owner, supplier, status text, and authorization flags can multiply one list request into hundreds of dependent requests. Prefer a bounded projection containing the summary fields or deliberately batch shared reference lookups. Cache reference labels only under an appropriate language and authorization scope. Measure the first useful result, not merely the first response, because a list full of placeholders is not yet operationally useful.
+
 ### Design assignment as a recoverable command
 
 An assignment dialog should resolve a valid owner identifier, not send the display name typed into a free-text input. Show the chosen owner and the number of selected objects before submission. Preserve the original selection while the dialog is open, but revalidate the selected keys when the command starts. A refresh or background update must not silently redirect an assignment to different rows.
@@ -279,3 +295,5 @@ For observability, log correlation identifiers and command outcomes, not unrestr
 3. [SAPUI5 official batch-control guide](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/batch-control-74142a3.md): V4 binding update groups, submission, pending changes, and error semantics.
 
 These official sources were consulted through GitHub. Resolve API details against the exact UI5 version deployed by the application; repository default branches can describe newer behavior than a maintained enterprise runtime.
+
+SDK reference: [`sap.m.List`](https://ui5.sap.com/#/api/sap.m.List). Direct SDK access failed DNS resolution during research; the GitHub sources above were retrieved successfully.

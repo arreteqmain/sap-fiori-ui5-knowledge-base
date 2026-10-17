@@ -305,6 +305,16 @@ Do not render untrusted note content as arbitrary HTML. Prefer text controls or 
 
 Define how attachments participate in the edit lifecycle. An upload may be persisted before the main form is saved, or it may belong to a draft or temporary upload session. Cancel cannot truthfully promise to undo an already permanent upload unless the backend supplies cleanup behavior. The UI should communicate this boundary and recover from orphaned temporary content safely.
 
+## Design child-object editing boundaries
+
+An item table on an order page does not automatically belong to the same edit transaction as the order header. Establish whether adding an item, editing its quantity, and saving the header must be atomic. If they must, the service must provide a compatible transaction contract, and all relevant bindings must use the intended update group and changeset behavior.
+
+If child editing opens a separate object page or dialog, state whether its Save persists independently. A parent Cancel that leaves independently saved child changes in place is legitimate only when that boundary is understandable. Avoid using identical Save and Cancel labels for different scopes without contextual headings.
+
+New child rows also need lifecycle ownership. A transient row can remain after a failed create, while an already persisted row requires a real delete operation to remove it. Distinguish correction, local cancellation, and deletion in both code and messaging. Preserve the parent key association using the supported service relationship rather than copying a display identifier into an arbitrary payload field.
+
+Finally, prevent unrelated background refreshes from replacing active child edits. If the server changes a total or availability value while the user edits an item, coordinate side-effect reads with pending updates and present any resulting conflict. A consistent-looking total is not worth silently discarding the user's intended quantity.
+
 ## Verify the lifecycle with representative scenarios
 
 Review a complete user journey, not just the first render. Open a deep link in a fresh browser session, edit a field, trigger a business validation error, correct it, save, and return to the source list. Repeat with a concurrent server change and a network interruption after submission.
@@ -336,3 +346,5 @@ Also inspect a long object with many child records, a restricted user, and a tra
 4. [SAPUI5 OData V4 batch control](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/batch-control-74142a3.md): API groups, reset boundaries, pending changes, and batch failure semantics.
 
 Examples are original compositions informed by these official sources, not a claim that the samples implement the complete business lifecycle described here.
+
+SDK reference: [`sap.uxap.ObjectPageLayout`](https://ui5.sap.com/#/api/sap.uxap.ObjectPageLayout). Research used successfully retrieved official GitHub files; direct SDK access failed DNS resolution.

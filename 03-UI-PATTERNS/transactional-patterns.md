@@ -264,6 +264,28 @@ A timeout after submission is an uncertain outcome, not necessarily failure. The
 
 Separate transport errors from business errors and per-item failures. In a mass action, report what succeeded and what needs correction. Keep unsuccessful selections or provide a result list with identifiers. Request logs should avoid sensitive payloads while preserving correlation information.
 
+## Preserve decimal and temporal meaning
+
+Treat service types as part of the transaction contract. Business decimals can exceed the precision of JavaScript floating-point arithmetic, and a formatted amount such as “1,234.50” is not a safe payload value across locales. Preserve the model's supported decimal representation and let typed bindings or a deliberately specified mapper handle conversion.
+
+Dates also require semantic choices. A requested delivery date can be a calendar date without a timezone, while a posting timestamp identifies an instant. Do not turn both into arbitrary JavaScript dates and serialize them identically. Confirm the actual OData type, timezone policy, and nullability before implementing input and review controls.
+
+Cross-field validation must use the same semantics as submission. A date range that appears valid in the browser can become invalid after an unintended timezone conversion. Likewise, client rounding can make a line total disagree with the backend. Prefer authoritative calculations for tax, pricing, and allocation rules, and display the returned result without quietly overwriting unrelated pending input.
+
+## Make recovery a first-class interaction
+
+After a recoverable validation failure, keep the user's working values and the transaction open. Explain which fields need attention and retain a useful route to the messages. Clearing the form to “start fresh” usually destroys the evidence needed to correct the error and increases the risk of a duplicate create attempt.
+
+When a session expires, distinguish reauthentication from replaying the business operation. Restoring identity does not automatically make a previously submitted command safe to repeat. The service must still resolve whether that operation committed. Never store access tokens or unrestricted business payloads in a convenience recovery object.
+
+If an application provides explicit session recovery, specify what is stored, where it is stored, how long it remains, and who can access it. Recovery should restore a proposed transaction for review, not silently submit it under a newly authenticated user. Revalidate ownership, current business state, and field values before resuming.
+
+## Respect audit and irreversible side effects
+
+The backend audit trail should identify the authenticated actor, affected business keys, requested operation, and confirmed outcome according to policy. A frontend timestamp or user name copied into the request is not authoritative evidence of identity. Avoid relying on the client clock for posting or approval time.
+
+Some operations send notifications, reserve inventory, or create external documents. Their compensating operation may differ from a simple field reset and may itself need authorization. Describe that consequence before submission and expose the real reversal process afterward if one exists. A toast labeled “Undo” is inappropriate when the backend cannot reverse the complete business effect.
+
 ## Verification checklist
 
 - [ ] Create, change, display, and copy have documented field and lifecycle rules.
@@ -284,3 +306,5 @@ Separate transport errors from business errors and per-item failures. In a mass 
 1. [SAPUI5 OData V4 batch control](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/batch-control-74142a3.md): API groups, reset behavior, changesets, retry, and batch versus operation failures.
 2. [SAPUI5 creating an entity in a collection](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/creating-an-entity-in-a-collection-c9723f8.md): transient contexts, persistence promises, lifecycle events, and create retries.
 3. [OpenUI5 Wizard sample](https://github.com/SAP/openui5/blob/master/src/sap.m/test/sap/m/demokit/sample/Wizard/view/Wizard.view.xml): validated steps, progression, review separation, and final submission.
+
+SDK reference: [`sap.m.Wizard`](https://ui5.sap.com/#/api/sap.m.Wizard). Research used successfully retrieved official GitHub files; direct SDK access failed DNS resolution.

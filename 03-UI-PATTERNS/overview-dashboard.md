@@ -184,6 +184,22 @@ Request aggregates directly from an analytical or purpose-built endpoint. Avoid 
 
 Cache only under an explicit freshness and authorization policy. A cache key must include relevant user or tenant scope, filters, and metric definition version. Browser storage is not automatically an appropriate place for financial or personnel summaries. In-memory data disappears on reload and is not offline support.
 
+## Explain freshness and comparison periods
+
+A comparison such as “12% better than last month” needs two defined periods and a consistent calculation. Comparing a partial current month with an entire previous month can mislead even when both figures are technically correct. Prefer equivalent elapsed periods or label the comparison explicitly. For business-day comparisons, agree how holidays and regional calendars affect the denominator.
+
+Display the effective data timestamp rather than the time the browser happened to render the card. A request can complete successfully while reading an analytical store refreshed an hour earlier. Distinguish request completion, source extraction time, and metric business period when those differences matter to the decision.
+
+Do not animate changes in a way that implies precision or causality the data does not support. A number increasing between refreshes might reflect late-arriving records, a revised conversion rate, or changed scope rather than new business events. Explain material restatements and keep threshold interpretation consistent with the published metric definition.
+
+## Govern personalization without hiding critical work
+
+Allowing users to reorder or hide cards can improve relevance, but define which operational information must remain available. If a compliance exception card can be hidden, provide another reliable route to that task. Personalization should not be the only mechanism that determines whether a critical condition is discoverable.
+
+Persist stable card identifiers and a layout schema version rather than generated control IDs. When a card is retired or its measure changes materially, migrate saved layouts deliberately and explain the change if users relied on it. Restore a sensible default when a saved configuration references a card the user can no longer access.
+
+Measure card usefulness through approved, privacy-conscious telemetry rather than logging full business payloads. Navigation frequency alone is not proof of value: a warning card may be useful precisely because it is usually clear. Review whether each card supports an actual decision and remove redundant measures instead of increasing information density indefinitely.
+
 ## Verification checklist
 
 - [ ] Each KPI has a documented formula, unit, period, and timezone.
@@ -205,3 +221,5 @@ Cache only under an explicit freshness and authorization policy. A cache key mus
 2. [SAPUI5 Overview Page card types](https://github.com/SAP-docs/sapui5/blob/main/docs/06_SAP_Fiori_Elements/types-of-cards-8ed3f76.md): available template families, OData-version distinction, and Overview Page refresh configuration.
 3. [SAPUI5 radial microchart guide](https://github.com/SAP-docs/sapui5/blob/main/docs/10_More_About_Controls/radial-micro-chart-aa93bdb.md): percentage, denominator, semantic colors, and responsive sizing.
 4. [SAPUI5 Overview Page card authorization settings](https://github.com/SAP-docs/sapui5/blob/main/docs/06_SAP_Fiori_Elements/setting-authorizations-for-cards-00683f9.md): navigation-intent-based card visibility and its scope.
+
+SDK reference: [`sap.f.Card`](https://ui5.sap.com/#/api/sap.f.Card). Research used successfully retrieved official GitHub files; direct SDK access failed DNS resolution.

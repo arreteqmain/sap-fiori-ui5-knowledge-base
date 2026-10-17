@@ -289,6 +289,28 @@ If an edited order no longer matches the report, explain why it disappeared rath
 
 For audit-sensitive exports or mass changes, record the query definition or selected business keys through the approved backend audit mechanism. Do not treat a browser console log or a downloaded filename as an audit trail. Data access, query retention, and action logging must follow the application's privacy policy.
 
+## Keep cell templates safe under virtualization
+
+A rendered row control can represent different business objects as the user scrolls. Do not attach business identity to a row's DOM position or capture a context once during initial rendering and reuse it forever. Event handlers should resolve the current binding context from the event source when the user acts.
+
+Cell templates should also remain lightweight. Creating nested forms, large fragments, or independent service requests in every cell defeats the benefit of row reuse. Use concise display controls and move complex editing into a focused interaction when the task permits. Profile both the initial viewport and rapid scrolling with realistic data, because they exercise different costs.
+
+Validation and status indicators must follow binding context changes correctly. A local error flag stored on a reused control can appear on the wrong record after scrolling. Put business-specific state in the model or a stable-keyed state map, and clear purely transient control state through a deliberate lifecycle.
+
+## Define totals and aggregation separately
+
+A plain grid table does not make every column analytically additive. Quantities with different units, amounts in different currencies, and percentages usually cannot be summed meaningfully without additional rules. If the report needs totals, define aggregation at the appropriate service or analytical layer and display the relevant unit and scope.
+
+Distinguish a total for the full filtered result from a subtotal for selected rows or a loaded page. A footer that changes as more contexts load must not be labeled as a complete business total. Export requirements should state whether totals are independently calculated, included as additional records, or omitted; spreadsheet presentation limitations do not justify silently changing the meaning.
+
+Grouping also has different implementations across table controls and data models. Do not carry `sap.m.List` group-header assumptions into a flat `sap.ui.table.Table` binding. For genuinely hierarchical or analytical tasks, assess the appropriate table type and supported binding contract rather than simulating hierarchy with indentation and fabricated data rows.
+
+## Bound expensive queries before execution
+
+Use mandatory or recommended criteria when an unfiltered query would be operationally unsafe. Validate the criteria before issuing the binding request, not after downloading the first large result. Explain why a plant, period, or organizational scope is required.
+
+Backend limits remain necessary even with frontend checks. Another client can call the same endpoint directly, and a saved variant can contain broader values than expected. Agree on maximum result windows, query timeouts, and an export-job alternative for legitimate large workloads. A useful error should identify the restriction and suggest a narrower query instead of presenting an unexplained empty table.
+
 ## Verification checklist
 
 - [ ] Desktop-only assumptions are explicit and an appropriate mobile path exists.
@@ -311,3 +333,5 @@ For audit-sensitive exports or mass changes, record the query definition or sele
 3. [SAPUI5 OData V4 batch control](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/batch-control-74142a3.md): submission groups, changesets, retry, and individual failure semantics.
 4. [SAPUI5 spreadsheet export](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/spreadsheet-export-2691788.md): module loading and explicit configuration for non-smart controls.
 5. [SAPUI5 spreadsheet export restrictions](https://github.com/SAP-docs/sapui5/blob/main/docs/04_Essentials/spreadsheet-export-restrictions-2c64148.md): supported output limits and unsupported presentation features.
+
+SDK reference: [`sap.ui.table.Table`](https://ui5.sap.com/#/api/sap.ui.table.Table). Research used successfully retrieved official GitHub files; direct SDK access failed DNS resolution.
